@@ -1,3 +1,9 @@
+**Write a program to implement MongoDB database connectivity with
+PHP/python/Java Implement Database navigation CRUD operations
+(add, delete, edit etc.) **
+
+
+
 from pymongo import MongoClient
 client = MongoClient("mongodb://127.0.0.1:27017/")
 mydb = client["mydb"]
