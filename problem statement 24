@@ -1,0 +1,29 @@
+**Trigger :Write a after trigger for Insert, update and delete
+event considering following requirement:
+Emp(Emp_no, Emp_name, Emp_salary)
+a) Trigger should be initiated when salary tried to be inserted
+is less than Rs.50,000/-
+b) Trigger should be initiated when salary tried to be updated
+for value less than Rs. 50,000/-
+Also the new values expected to be inserted will be stored in new
+table Tracking(Emp_no,Emp_salary).**
+
+CREATE OR REPLACE TRIGGER t1
+AFTER INSERT OR UPDATE OR DELETE
+ON Emp
+FOR EACH ROW
+BEGIN
+  
+  IF INSERTING AND :NEW.Emp_salary < 50000 THEN
+    INSERT INTO Tracking VALUES(:NEW.Emp_no, :NEW.Emp_salary);
+  
+  
+  ELSIF UPDATING AND :NEW.Emp_salary < 50000 THEN
+    INSERT INTO Tracking VALUES(:NEW.Emp_no, :NEW.Emp_salary);
+  
+ 
+  ELSIF DELETING THEN
+    INSERT INTO Tracking VALUES(:OLD.Emp_no, :OLD.Emp_salary);
+  END IF;
+END;
+/
