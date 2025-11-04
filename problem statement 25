@@ -1,0 +1,32 @@
+from pymongo import MongoClient
+client = MongoClient("mongodb://127.0.0.1:27017/")
+mydb = client["mydb"]
+myColl = mydb["myColl"]
+
+
+def insert():
+    n = int(input("Enter number of students: "))
+    for i in range(n):
+        name = input("Enter name: ")
+        age = int(input("Enter age: "))
+        myColl.insert_one({"Name": name, "Age": age})
+    print("Data inserted successfully!")
+
+
+def updation():
+    name = input("Enter name to be updated: ")
+    new_age = int(input("Enter new age: "))
+    myColl.update_one({"Name": name}, {"$set": {"Age": new_age}})
+    print("Record updated successfully!")
+
+
+def deletion():
+    name = input("Enter name to be deleted: ")
+    myColl.delete_one({"Name": name})
+    print("Record deleted successfully!")
+
+
+insert()
+updation()
+deletion()
+  
