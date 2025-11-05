@@ -1,0 +1,32 @@
+Trigger: Create a row level trigger for the CUSTOMERS table that 
+would fire INSERT or UPDATE or DELETE operations performed on the 
+CUSTOMERS table. This trigger will display the salary difference 
+between the old values and new values.
+
+CREATE TABLE CUSTOMERS (
+  customer_id   NUMBER(5) PRIMARY KEY,
+  name          VARCHAR2(50),
+  salary        NUMBER(10,2));
+
+
+
+SET SERVEROUTPUT ON;
+
+CREATE OR REPLACE TRIGGER trg_salary_audit
+AFTER INSERT OR UPDATE OR DELETE
+ON CUSTOMERS
+FOR EACH ROW
+BEGIN
+  IF INSERTING THEN
+    DBMS_OUTPUT.PUT_LINE('Inserted salary: ' || :NEW.salary);
+
+  ELSIF UPDATING THEN
+    DBMS_OUTPUT.PUT_LINE('Old salary: ' || :OLD.salary);
+    DBMS_OUTPUT.PUT_LINE('New salary: ' || :NEW.salary);
+    DBMS_OUTPUT.PUT_LINE('Salary difference: ' || (:NEW.salary - :OLD.salary));
+
+  ELSIF DELETING THEN
+    DBMS_OUTPUT.PUT_LINE('Deleted salary: ' || :OLD.salary);
+  END IF;
+END;
+/
