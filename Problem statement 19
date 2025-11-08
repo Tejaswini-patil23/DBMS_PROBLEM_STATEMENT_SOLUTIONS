@@ -1,0 +1,47 @@
+-- Employee table
+CREATE TABLE emp (
+    emp_no   NUMBER(5) PRIMARY KEY,
+    salary   NUMBER(10)
+);
+
+-- Table to record increments
+CREATE TABLE increment_salary (
+    emp_no   NUMBER(5),
+    salary   NUMBER(10)
+);
+
+INSERT INTO emp VALUES (101, 30000);
+INSERT INTO emp VALUES (102, 40000);
+INSERT INTO emp VALUES (103, 50000);
+INSERT INTO emp VALUES (104, 60000);
+INSERT INTO emp VALUES (105, 70000);
+
+COMMIT;
+
+DECLARE
+    v_avg_salary  NUMBER(10);
+    v_salary_inc  NUMBER(10);
+BEGIN
+    -- Step 1: Find average salary
+    SELECT AVG(salary)
+    INTO v_avg_salary
+    FROM emp;
+
+    -- Step 2: Loop through employees whose salary < average
+    FOR rec IN (SELECT emp_no, salary FROM emp WHERE salary < v_avg_salary) LOOP
+        -- Step 3: Calculate 10% increment
+        v_salary_inc := rec.salary + (rec.salary * 0.10);
+
+        -- Step 4: Update EMP table
+        UPDATE emp
+        SET salary = v_salary_inc
+        WHERE emp_no = rec.emp_no;
+
+        -- Step 5: Insert record into increment_salary table
+        INSERT INTO increment_salary (emp_no, salary)
+        VALUES (rec.emp_no, v_salary_inc);
+    END LOOP;
+
+    DBMS_OUTPUT.PUT_LINE('Salary updated for below-average employees.');
+END;
+/
