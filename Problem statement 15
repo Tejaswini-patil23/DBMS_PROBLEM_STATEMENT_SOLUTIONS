@@ -1,0 +1,21 @@
+-- Step 1: Create the table
+CREATE TABLE areas (
+    radius NUMBER(5),
+    area   NUMBER(10,2)
+);
+
+-- Step 2: PL/SQL block
+DECLARE
+    v_area NUMBER(10,2);
+    pi     CONSTANT NUMBER(4,2) := 3.14;
+BEGIN
+    FOR r IN 5..9 LOOP
+        v_area := pi * r * r;
+        INSERT INTO areas (radius, area)
+        VALUES (r, v_area);
+        DBMS_OUTPUT.PUT_LINE('Radius: ' || r || '  Area: ' || v_area);
+    END LOOP;
+
+    DBMS_OUTPUT.PUT_LINE('✅ All values inserted successfully.');
+END;
+/
