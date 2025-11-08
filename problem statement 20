@@ -1,0 +1,81 @@
+-- Table to store student marks
+CREATE TABLE stud_marks (
+    name VARCHAR2(30),
+    total_marks NUMBER(4)
+);
+
+-- Table to store final results
+CREATE TABLE result (
+    roll NUMBER(3),
+    name VARCHAR2(30),
+    class VARCHAR2(20)
+);
+
+
+CREATE OR REPLACE PROCEDURE proc_grade (
+    p_marks IN NUMBER,
+    p_name  IN VARCHAR2,
+    p_roll  IN NUMBER,
+    p_grade OUT VARCHAR2
+)
+IS
+BEGIN
+    IF p_marks BETWEEN 990 AND 1500 THEN
+        p_grade := 'Distinction';
+    ELSIF p_marks BETWEEN 900 AND 989 THEN
+        p_grade := 'First Class';
+    ELSIF p_marks BETWEEN 825 AND 899 THEN
+        p_grade := 'Second Class';
+    ELSE
+        p_grade := 'Fail';
+    END IF;
+END;
+/
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_name   VARCHAR2(30);
+    v_roll   NUMBER(3);
+    v_marks  NUMBER(4);
+    v_grade  VARCHAR2(20);
+BEGIN
+    -- take user input
+    v_name := '&Enter_Student_Name';
+    v_roll := &Enter_Roll_Number;
+
+    -- safely fetch marks
+    BEGIN
+        SELECT total_marks
+        INTO v_marks
+        FROM stud_marks
+        WHERE name = v_name;
+
+        -- call procedure
+        proc_grade(v_marks, v_name, v_roll, v_grade);
+
+        -- display and insert
+        DBMS_OUTPUT.PUT_LINE('Student: ' || v_name);
+        DBMS_OUTPUT.PUT_LINE('Marks: ' || v_marks);
+        DBMS_OUTPUT.PUT_LINE('Grade: ' || v_grade);
+
+        INSERT INTO result VALUES (v_roll, v_name, v_grade);
+        DBMS_OUTPUT.PUT_LINE('Record inserted into Result table.');
+    
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            DBMS_OUTPUT.PUT_LINE('No record found for ' || v_name);
+        WHEN TOO_MANY_ROWS THEN
+            DBMS_OUTPUT.PUT_LINE('Duplicate name found for ' || v_name);
+    END;
+END;
+/
+
+INSERT INTO stud_marks VALUES ('Amit', 1200);
+INSERT INTO stud_marks VALUES ('Neha', 950);
+INSERT INTO stud_marks VALUES ('Ravi', 870);
+INSERT INTO stud_marks VALUES ('Pooja', 700);
+COMMIT;
+
+
+
