@@ -1,0 +1,64 @@
+***Write a Row Level Before and After Trigger on Library table. The 
+System should keep track of the records that are being updated or 
+deleted. The old value of updated or deleted records should be 
+added in Library_Audit table. ***
+
+CREATE TABLE library(
+  book_id NUMBER(4),
+  book_name VARCHAR2(10),
+  price NUMBER(4),
+  author VARCHAR2(4)
+);
+
+CREATE TABLE audits(
+  book_id NUMBER(4),
+  book_name VARCHAR2(10),
+  price NUMBER(4),
+  author VARCHAR2(4)
+);
+
+-- AFTER trigger: inserts OLD values into audits table
+CREATE OR REPLACE TRIGGER a1
+AFTER DELETE OR UPDATE ON library
+FOR EACH ROW
+BEGIN
+  IF DELETING THEN
+    dbms_output.put_line('Deleting record added to audits');
+    INSERT INTO audits VALUES(:old.book_id, :old.book_name, :old.price, :old.author);
+  ELSIF UPDATING THEN
+    dbms_output.put_line('Updating record added to audits');
+    INSERT INTO audits VALUES(:old.book_id, :old.book_name, :old.price, :old.author);
+  END IF;
+END;
+/
+
+-- BEFORE trigger: just prints messages before operation
+CREATE OR REPLACE TRIGGER b1
+BEFORE DELETE OR UPDATE ON library
+FOR EACH ROW
+BEGIN
+  IF DELETING THEN
+    dbms_output.put_line('Before deleting record...');
+  ELSIF UPDATING THEN
+    dbms_output.put_line('Before updating record...');
+  END IF;
+END;
+/
+
+-- Test data
+INSERT INTO library VALUES (1001, 'DBMS', 500, 'ABCD');
+INSERT INTO library VALUES (1002, 'CNNT', 450, 'EFGH');
+INSERT INTO library VALUES (1003, 'OPER', 550, 'IJKL');
+INSERT INTO library VALUES (1004, 'JAVA', 600, 'MNOP');
+
+-- Update and delete operations
+UPDATE library 
+SET price = 650 
+WHERE book_id = 1001;
+
+DELETE FROM library 
+WHERE book_id = 1002;
+
+-- View results
+SELECT * FROM library;
+SELECT * FROM audits;
