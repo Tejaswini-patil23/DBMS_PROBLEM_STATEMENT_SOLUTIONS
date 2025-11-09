@@ -1,0 +1,84 @@
+-- 🏨 Create Database
+CREATE DATABASE hotel;
+
+-- 🏨 Select the Database
+USE hotel;
+
+-- 🧾 Create table: Cust_Master (Cust_no, Cust_name, Cust_addr)
+CREATE TABLE cust_master(
+    cust_no INT(4) PRIMARY KEY,
+    cust_name VARCHAR(20) NOT NULL,
+    cust_address VARCHAR(50) NOT NULL
+);
+
+-- 🧾 Insert sample customer records
+INSERT INTO cust_master VALUES (1, 'siya', 'street1');
+INSERT INTO cust_master VALUES (2, 'meena', 'street2');
+INSERT INTO cust_master VALUES (3, 'chuna', 'street3');
+INSERT INTO cust_master VALUES (4, 'wall', 'street4');
+INSERT INTO cust_master VALUES (5, 'salim', 'street5');
+
+-- 📦 Create table: Orders (Order_no, Cust_no, Order_date, Qty_Ordered)
+CREATE TABLE orders(
+    order_no INT(8) PRIMARY KEY,
+    cust_no INT(4),
+    order_date DATE NOT NULL,
+    quantity INT(5),
+    FOREIGN KEY (cust_no) REFERENCES cust_master(cust_no)
+);
+
+-- 📦 Insert sample order records
+INSERT INTO orders VALUES (101, 1, '2023-12-23', 4);
+INSERT INTO orders VALUES (102, 2, '2025-02-02', 2);
+
+-- 🎁 Create table: Product (Product_no, Product_name, Order_no)
+CREATE TABLE product(
+    product_no INT(4) PRIMARY KEY,
+    product_name VARCHAR(20) NOT NULL,
+    order_no INT(4),
+    FOREIGN KEY (order_no) REFERENCES orders(order_no)
+);
+
+-- 🎁 Insert sample product records
+INSERT INTO product VALUES (201, 'milk', 101);
+INSERT INTO product VALUES (202, 'bread', 102);
+
+-- ✅ 1. List names of customers having 'A' as second letter in their name.
+SELECT cust_name 
+FROM cust_master 
+WHERE cust_name LIKE '_a%';
+
+-- ✅ 2. Display orders from Customer no 1, 2, 3, and 4 (example of C1002,... replaced with numeric)
+SELECT * 
+FROM orders 
+WHERE cust_no IN (1, 2, 3, 4);
+
+-- ✅ 3. List Clients who stay in either 'street1' or 'street3' (as example for Banglore/Manglore)
+SELECT cust_name 
+FROM cust_master 
+WHERE cust_address = 'street1' 
+   OR cust_address = 'street3';
+
+-- ✅ 4. Display name of customers & the product_name they have purchased
+SELECT cust_master.cust_name, product.product_name 
+FROM cust_master 
+INNER JOIN orders ON cust_master.cust_no = orders.cust_no
+INNER JOIN product ON orders.order_no = product.order_no;
+
+-- ✅ 5. Create view View1 consisting of Cust_name, Product_name
+CREATE VIEW View1 AS
+SELECT cust_master.cust_name, product.product_name 
+FROM cust_master 
+INNER JOIN orders ON cust_master.cust_no = orders.cust_no
+INNER JOIN product ON orders.order_no = product.order_no;
+
+-- ✅ 6. Display product_name and quantity purchased by each customer
+SELECT product.product_name, orders.quantity 
+FROM orders 
+INNER JOIN product ON product.order_no = orders.order_no;
+
+-- ✅ 7. Perform different join operations (Example: INNER JOIN shown)
+SELECT cust_master.cust_name, product.product_name, orders.quantity
+FROM cust_master 
+INNER JOIN orders ON cust_master.cust_no = orders.cust_no
+INNER JOIN product ON orders.order_no = product.order_no;
