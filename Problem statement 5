@@ -1,0 +1,106 @@
+-- 🏢 Create Database
+CREATE DATABASE companyDB;
+
+-- 🔄 Select the database
+USE companyDB;
+
+-- 👨‍💼 Create Employee Table
+CREATE TABLE Employee(
+    emp_id INT PRIMARY KEY,                        -- Unique Employee ID
+    employee_name VARCHAR(50) NOT NULL UNIQUE,     -- Employee name (must be unique for FK references)
+    street VARCHAR(50),                            -- Street address
+    city VARCHAR(50)                               -- City name
+);
+
+-- 💼 Create Company Table
+CREATE TABLE Company(
+    company_name VARCHAR(50) PRIMARY KEY,          -- Unique company name
+    city VARCHAR(50) NOT NULL                      -- Company city
+);
+
+-- 🧾 Create Works Table (link between Employee & Company)
+CREATE TABLE Works(
+    emp_id INT,                                    -- References Employee
+    company_name VARCHAR(50),                      -- References Company
+    salary DECIMAL(10,2),                          -- Salary of the employee
+    FOREIGN KEY (emp_id) REFERENCES Employee(emp_id),
+    FOREIGN KEY (company_name) REFERENCES Company(company_name)
+);
+
+-- 🧑‍🏫 Create Manages Table (self-reference to Employee)
+CREATE TABLE Manages(
+    emp_id INT,                                    -- Employee ID
+    manager_id INT,                                -- Manager's Employee ID
+    FOREIGN KEY (emp_id) REFERENCES Employee(emp_id),
+    FOREIGN KEY (manager_id) REFERENCES Employee(emp_id)
+);
+
+-- 🧍 Insert Employee Records
+INSERT INTO Employee VALUES
+(1, 'Amit', 'MG Road', 'Pune'),
+(2, 'Neha', 'Link Road', 'Mumbai'),
+(3, 'Ravi', 'Brigade Road', 'Delhi'),
+(4, 'Meena', 'Church Street', 'Hyderabad'),
+(5, 'Karan', 'Hill Road', 'Chennai');
+
+-- 🏙️ Insert Company Records
+INSERT INTO Company VALUES
+('TCS', 'Pune'),
+('InfoSys', 'Hyderabad'),
+('TechM', 'Bangalore'),
+('Wipro', 'Chennai');
+
+-- 💵 Insert Works Records (who works where and salary)
+INSERT INTO Works VALUES
+(1, 'TCS', 15000),
+(2, 'InfoSys', 12000),
+(3, 'TechM', 11000),
+(4, 'TechM', 9500),
+(5, 'Wipro', 13000);
+
+-- 👔 Insert Manages Records (who manages whom)
+INSERT INTO Manages VALUES
+(1, 2),    -- Amit is managed by Neha
+(2, 5),    -- Neha is managed by Karan
+(3, 1),    -- Ravi is managed by Amit
+(4, 2),    -- Meena is managed by Neha
+(5, 1);    -- Karan is managed by Amit
+
+
+/* ============================
+   📊 QUERIES
+   ============================ */
+
+-- 1️⃣ Find the names of all employees who work for 'TCS'
+SELECT Employee.employee_name
+FROM Employee
+INNER JOIN Works ON Employee.emp_id = Works.emp_id
+WHERE Works.company_name = 'TCS';
+
+
+-- 2️⃣ Find names and company names of all employees
+--     Sorted by company (ascending) and employee (descending)
+SELECT Employee.employee_name, Works.company_name
+FROM Employee
+INNER JOIN Works ON Employee.emp_id = Works.emp_id
+ORDER BY Works.company_name ASC, Employee.employee_name DESC;
+
+
+-- 3️⃣ Change the city of employees working with 'InfoSys' to 'Bangalore'
+UPDATE Employee
+INNER JOIN Works ON Employee.emp_id = Works.emp_id
+SET Employee.city = 'Bangalore'
+WHERE Works.company_name = 'InfoSys';
+
+
+-- 4️⃣ Find name, street, and city of employees
+--     who work for 'TechM' and earn more than 10,000
+SELECT Employee.employee_name, Employee.street, Employee.city
+FROM Employee
+INNER JOIN Works ON Employee.emp_id = Works.emp_id
+WHERE Works.company_name = 'TechM' AND Works.salary > 10000;
+
+
+-- 5️⃣ Add a new column 'assets' to the Company table
+ALTER TABLE Company
+ADD COLUMN assets INT(4);
