@@ -1,0 +1,76 @@
+-- =========================================
+-- 1️⃣ Create View1 to display all customers (alphabetical) 
+-- who have a loan from Pune_Station branch
+-- Explanation:
+-- - Joining Borrower and Loan tables to get customers with loans.
+-- - Filtering for 'Pune_Station' branch.
+-- - Ordering by customer name alphabetically.
+-- =========================================
+CREATE VIEW v1 AS
+SELECT Borrower.cust_name
+FROM Borrower
+INNER JOIN Loan ON Borrower.loan_no = Loan.loan_no
+WHERE Loan.branch_name = 'Pune_Station'
+ORDER BY Borrower.cust_name;
+
+-- =========================================
+-- 2️⃣ Create View2 on Branch table selecting two columns
+-- Explanation:
+-- - Selecting branch_name and branch_city from Branch table.
+-- - Can perform insert, update, delete operations on the view (if allowed by MySQL rules)
+-- =========================================
+CREATE VIEW v2 AS
+SELECT branch_name, branch_city
+FROM Branch;
+
+-- Example operations on v2 (worked successfully)
+-- Insert a row into view
+INSERT INTO v2 VALUES ('kharadi', 'goa');
+
+-- Delete the row inserted
+DELETE FROM v2 WHERE branch_name='Kharadi';
+
+-- Update branch city for a branch
+UPDATE v2 SET branch_city='goa' WHERE branch_name='Camp';
+
+-- =========================================
+-- 3️⃣ Create View3 on Borrower and Depositor table selecting one column each
+-- Explanation:
+-- - Selecting cust_name from Borrower and acc_no from Depositor.
+-- - Inner join ensures only customers who are both borrowers and depositors appear.
+-- =========================================
+CREATE VIEW v3 AS
+SELECT Borrower.cust_name, Depositor.acc_no
+FROM Borrower
+INNER JOIN Depositor ON Borrower.cust_name = Depositor.cust_name;
+
+-- =========================================
+-- 4️⃣ Create Union of left and right join for all customers who have an account or loan or both
+-- Explanation:
+-- - Left join: all customers with their accounts and/or loans (NULL if missing)
+-- - Right join: ensures we also get customers with loan but no account
+-- - UNION combines both results and removes duplicates
+-- =========================================
+SELECT Customer.cust_name, Depositor.acc_no, Borrower.loan_no
+FROM Customer
+LEFT JOIN Depositor ON Customer.cust_name = Depositor.cust_name
+LEFT JOIN Borrower ON Customer.cust_name = Borrower.cust_name
+UNION
+SELECT Customer.cust_name, Depositor.acc_no, Borrower.loan_no
+FROM Customer
+RIGHT JOIN Depositor ON Customer.cust_name = Depositor.cust_name
+RIGHT JOIN Borrower ON Customer.cust_name = Borrower.cust_name;
+
+-- =========================================
+-- 5️⃣ Create Simple Index
+-- Explanation:
+-- - Creates an index on Loan table's loan_no column to speed up searches
+-- =========================================
+CREATE INDEX i1 ON Loan(loan_no);
+
+-- =========================================
+-- 6️⃣ Display index Information
+-- Explanation:
+-- - Shows all indexes on the Loan table, including primary key and the one just created
+-- =========================================
+SHOW INDEX FROM Loan;
