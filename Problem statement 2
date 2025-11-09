@@ -1,0 +1,29 @@
+1) SELECT DISTINCT d.cust_name
+FROM depositor d
+INNER JOIN borrower b ON d.cust_name = b.cust_name;
+
+
+2)SELECT cust_name 
+FROM depositor
+UNION
+SELECT cust_name 
+FROM borrower;
+
+
+3)SELECT d.cust_name
+FROM depositor d
+LEFT JOIN borrower b ON d.cust_name = b.cust_name
+WHERE b.cust_name IS NULL;
+
+
+4)SELECT AVG(account.balance)
+FROM account
+INNER JOIN branch ON account.branch_name = branch.branch_name
+WHERE branch.branch_name = 'Wadia College';
+
+5)SELECT account.branch_name, COUNT(DISTINCT depositor.cust_name)
+FROM depositor 
+INNER JOIN account ON account.acc_no = depositor.acc_no
+GROUP BY account.branch_name;
+
+
