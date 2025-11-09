@@ -1,0 +1,91 @@
+CREATE DATABASE bank;
+USE bank;
+
+CREATE TABLE branch (
+  branch_name VARCHAR(20),
+  branch_city VARCHAR(20),
+  assets INT,
+  PRIMARY KEY (branch_name)
+);
+
+CREATE TABLE account (
+  acc_no INT(4) PRIMARY KEY,
+  branch_name VARCHAR(20),
+  balance INT(8),
+  FOREIGN KEY (branch_name) REFERENCES branch(branch_name)
+);
+
+CREATE TABLE customer (
+  cust_name VARCHAR(20),
+  cust_street VARCHAR(20),
+  cust_city VARCHAR(20),
+  PRIMARY KEY (cust_name)
+);
+
+CREATE TABLE depositor (
+  cust_name VARCHAR(20),
+  acc_no INT(4),
+  FOREIGN KEY (cust_name) REFERENCES customer(cust_name),
+  FOREIGN KEY (acc_no) REFERENCES account(acc_no)
+);
+
+CREATE TABLE loan (
+  loan_no INT PRIMARY KEY,
+  branch_name VARCHAR(20),
+  amount INT,
+  FOREIGN KEY (branch_name) REFERENCES branch(branch_name)
+);
+
+CREATE TABLE borrower (
+  cust_name VARCHAR(20),
+  loan_no INT,
+  FOREIGN KEY (cust_name) REFERENCES customer(cust_name),
+  FOREIGN KEY (loan_no) REFERENCES loan(loan_no)
+);
+
+INSERT INTO loan VALUES (1, 'kharadi', 12000);
+INSERT INTO loan VALUES (2, 'camp', 5100);
+INSERT INTO loan VALUES (3, 'vimannagar', 39000);
+INSERT INTO loan VALUES (4, 'wadia college', 9000);
+INSERT INTO loan VALUES (5, 'ruby hall', 19000);
+INSERT INTO loan VALUES (6, 'ruby hall', 1000);
+INSERT INTO loan VALUES (7, 'wadia college', 21000);
+INSERT INTO loan VALUES (8, 'wadia college', 29000);
+
+INSERT INTO borrower VALUES ('divya', 1);
+INSERT INTO borrower VALUES ('meera', 2);
+INSERT INTO borrower VALUES ('saee', 3);
+INSERT INTO borrower VALUES ('mahek', 4);
+INSERT INTO borrower VALUES ('samar', 5);
+INSERT INTO borrower VALUES ('karan', 6);
+INSERT INTO borrower VALUES ('sudhir', 7);
+
+INSERT INTO branch VALUES ('p1', 'pune', 1200000);
+INSERT INTO branch VALUES ('m1', 'mumbai', 200000);
+INSERT INTO branch VALUES ('m2', 'mumbai', 700000);
+INSERT INTO branch VALUES ('n2', 'nashik', 3100000);
+INSERT INTO branch VALUES ('n3', 'nashik', 100000);
+INSERT INTO branch VALUES ('n1', 'nashik', 500000);
+
+-- 1️⃣ Find the names of all branches in loan relation.
+SELECT branch_name FROM loan;
+
+-- 2️⃣ Find all loan numbers for loans made at ‘Wadia College’ Branch with loan amount > 12000.
+SELECT loan_no FROM loan WHERE amount > 12000 AND branch_name = 'wadia college';
+
+-- 3️⃣ Find all customers who have a loan from bank. Find their names, loan_no and loan amount.
+SELECT borrower.cust_name, loan.loan_no, loan.amount
+FROM borrower
+INNER JOIN loan
+ON borrower.loan_no = loan.loan_no;
+
+-- 4️⃣ List all customers in alphabetical order who have loan from ‘Wadia College’ branch.
+SELECT borrower.cust_name
+FROM borrower
+INNER JOIN loan
+ON borrower.loan_no = loan.loan_no
+WHERE loan.branch_name = 'wadia college'
+ORDER BY borrower.cust_name;
+
+-- 5️⃣ Display distinct cities of branch.
+SELECT DISTINCT branch_city FROM branch;
