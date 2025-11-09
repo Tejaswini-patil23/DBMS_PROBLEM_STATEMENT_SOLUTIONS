@@ -1,0 +1,27 @@
+-- 1. Find the branches where average account balance > 15000.
+SELECT branch_name, AVG(balance) AS avg_balance
+FROM account
+GROUP BY branch_name
+HAVING AVG(balance) > 15000;
+
+-- 2. Find number of tuples in customer relation.
+SELECT COUNT(*)
+FROM customer;
+
+-- 3. Calculate total loan amount given by bank.
+SELECT SUM(amount) 
+FROM loan;
+
+-- 4. Delete all loans with loan amount between 1300 and 1500.
+DELETE FROM loan
+WHERE amount BETWEEN 1300 AND 1500;
+
+-- 5. Find the average account balance at each branch.
+SELECT branch_name, AVG(balance) 
+FROM account
+GROUP BY branch_name;
+
+-- 6. Find name of Customer and city where customer name starts with Letter P.
+SELECT cust_name, cust_city
+FROM customer
+WHERE cust_name LIKE 'p%';
