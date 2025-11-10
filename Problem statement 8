@@ -1,0 +1,76 @@
+-- Use the database
+USE shopping;
+
+-- 1. Create base tables
+CREATE TABLE companies (
+    comp_id INT(4) PRIMARY KEY,
+    name VARCHAR(10),
+    cost INT(5),
+    year INT(4)
+);
+
+CREATE TABLE orders (
+    comp_id INT(4),
+    domain VARCHAR(10),
+    quantity INT(4),
+    FOREIGN KEY (comp_id) REFERENCES companies(comp_id)
+);
+
+-- 2. Insert sample data into both tables
+INSERT INTO companies VALUES (1, 'a', 4500, 2021);
+INSERT INTO companies VALUES (2, 'b', 500, 2001);
+INSERT INTO companies VALUES (3, 'c', 7866, 2013);
+INSERT INTO companies VALUES (4, 'd', 876, 2003);
+INSERT INTO companies VALUES (5, 'e', 510, 2007);
+
+INSERT INTO orders VALUES (1, 'dairy', 510);
+INSERT INTO orders VALUES (2, 'food', 29);
+INSERT INTO orders VALUES (3, 'fish', 76);
+INSERT INTO orders VALUES (4, 'bakery', 89);
+INSERT INTO orders VALUES (5, 'car', 989);
+
+-- 3. INNER JOIN: Find names, costs, domains, and quantities for companies
+SELECT companies.name, companies.cost, orders.domain, orders.quantity
+FROM companies
+INNER JOIN orders
+ON companies.comp_id = orders.comp_id;
+
+-- 4. LEFT OUTER JOIN: Include all companies even if no matching order
+SELECT companies.name, companies.cost, orders.domain, orders.quantity
+FROM companies
+LEFT OUTER JOIN orders
+ON companies.comp_id = orders.comp_id;
+
+-- 5. RIGHT OUTER JOIN: Include all orders even if no matching company
+SELECT companies.name, companies.cost, orders.domain, orders.quantity
+FROM companies
+RIGHT OUTER JOIN orders
+ON companies.comp_id = orders.comp_id;
+
+-- 6. UNION: Combine company and order data vertically
+SELECT name, cost, NULL AS quantity, NULL AS domain
+FROM companies
+UNION
+SELECT NULL AS name, NULL AS cost, quantity, domain
+FROM orders;
+
+-- 7. Create View1: Show company name and quantities from both tables
+CREATE VIEW v1 AS
+SELECT companies.name, orders.quantity
+FROM companies
+INNER JOIN orders
+ON companies.comp_id = orders.comp_id;
+
+-- 8. Display View1
+SELECT * FROM v1;
+
+-- 9. Create View2: Select any two columns from Companies
+CREATE OR REPLACE VIEW v2 AS
+SELECT name, comp_id
+FROM companies;
+
+-- 10. Insert into View2 (this also inserts into base table Companies)
+INSERT INTO v2 VALUES ('f', 10);
+
+-- 11. Display View2 content
+SELECT * FROM v2;
