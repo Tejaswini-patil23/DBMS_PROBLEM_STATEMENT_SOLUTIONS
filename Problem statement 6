@@ -1,0 +1,95 @@
+-- =========================================================
+-- 1. Create Tables with Constraints
+-- =========================================================
+
+-- Employee table: emp_id as PRIMARY KEY
+CREATE TABLE Employee (
+    emp_id INT NOT NULL,
+    employee_name VARCHAR(50) NOT NULL,
+    street VARCHAR(100),
+    city VARCHAR(50),
+    PRIMARY KEY(emp_id)
+);
+
+-- Works table: emp_id as FOREIGN KEY referencing Employee
+CREATE TABLE Works (
+    emp_id INT NOT NULL,
+    company_name VARCHAR(50) NOT NULL,
+    salary DECIMAL(10,2),
+    FOREIGN KEY (emp_id) REFERENCES Employee(emp_id)
+);
+
+-- Company table: company_name as PRIMARY KEY
+CREATE TABLE Company (
+    company_name VARCHAR(50) NOT NULL,
+    city VARCHAR(50),
+    assets DECIMAL(15,2),
+    PRIMARY KEY(company_name)
+);
+
+-- Manages table: emp_id and manager_id as FOREIGN KEYS referencing Employee
+CREATE TABLE Manages (
+    emp_id INT NOT NULL,
+    manager_id INT NOT NULL,
+    FOREIGN KEY (emp_id) REFERENCES Employee(emp_id),
+    FOREIGN KEY (manager_id) REFERENCES Employee(emp_id)
+);
+
+-- =========================================================
+-- 2. Change the city of employee working with InfoSys to 'Bangalore'
+-- =========================================================
+UPDATE Employee
+INNER JOIN Works ON Employee.emp_id = Works.emp_id
+SET Employee.city = 'Bangalore'
+WHERE Works.company_name = 'InfoSys';
+
+-- =========================================================
+-- 3. Find names of all employees earning more than the average salary of their company
+-- =========================================================
+SELECT Employee.employee_name
+FROM Employee
+INNER JOIN Works ON Employee.emp_id = Works.emp_id
+WHERE Works.salary > (
+    SELECT AVG(w2.salary)
+    FROM Works AS w2
+    WHERE w2.company_name = Works.company_name
+);
+
+-- Optional: If you want employees earning exactly the average salary too
+SELECT Employee.employee_name
+FROM Employee
+INNER JOIN Works ON Employee.emp_id = Works.emp_id
+WHERE Works.salary = (
+    SELECT AVG(w2.salary)
+    FROM Works AS w2
+    WHERE w2.company_name = Works.company_name
+);
+
+-- =========================================================
+-- 4. Find names, street, and city of employees who work for 'TechM' and earn > 10,000
+-- =========================================================
+SELECT Employee.employee_name, Employee.street, Employee.city
+FROM Employee
+INNER JOIN Works ON Employee.emp_id = Works.emp_id
+WHERE Works.company_name = 'TechM'
+  AND Works.salary > 10000;
+
+-- =========================================================
+-- 5. Rename table Manages to Management
+-- =========================================================
+ALTER TABLE Manages RENAME TO Management;
+
+-- =========================================================
+-- 6. Create Simple and Unique indexes on Employee table
+-- =========================================================
+
+-- Simple (non-unique) index on emp_id
+CREATE INDEX i1 ON Employee(emp_id);
+
+-- Unique index on emp_id (usually redundant if emp_id is PRIMARY KEY)
+CREATE UNIQUE INDEX i2 ON Employee(emp_id);
+
+-- =========================================================
+-- 7. Display index information on Employee table
+-- =========================================================
+SHOW INDEX FROM Employee;
