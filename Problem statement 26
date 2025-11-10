@@ -1,0 +1,107 @@
+# ===========================================================
+# 🧩 C2 – MySQL Database Connectivity Using Python
+# ===========================================================
+# 🎯 Problem Statement:
+# Implement MySQL database connectivity using Python and perform
+# database navigation operations: Add, Edit, Delete.
+# ===========================================================
+
+# ==============================
+# ⚙️ Step 1: Import the Library
+# ==============================
+
+# Import MySQL Connector module
+import mysql.connector
+
+
+# ==============================
+# 🗄️ Step 2: Establish Connection
+# ==============================
+
+# Connect to MySQL database using mysql.connector
+db = mysql.connector.connect(
+    host="localhost",      # Host name (localhost for local MySQL server)
+    user="root",           # MySQL username
+    password="root",       # Password set for MySQL root user
+    database="connectMe"   # Database name created earlier
+)
+
+# Create a cursor object to execute SQL queries
+Cursor = db.cursor()
+
+
+# ==================================================
+# ➕ Step 3: INSERT Operation (Add new records)
+# ==================================================
+
+# Insert first record into 'students' table
+sqlInsert = "INSERT INTO students (roll, name) VALUES (21, 'Stewie')"
+Cursor.execute(sqlInsert)
+print(Cursor.rowcount, "record added to database.")
+
+# Insert second record into 'students' table
+sqlInsert = "INSERT INTO students (roll, name) VALUES (22, 'Foxy')"
+Cursor.execute(sqlInsert)
+print(Cursor.rowcount, "record added to database.")
+
+
+# ==================================================
+# ✏️ Step 4: UPDATE Operation (Edit existing record)
+# ==================================================
+
+# Update roll number of student where roll = 20 → change to 21
+sqlUpdate = "UPDATE students SET roll = 21 WHERE roll = 20"
+Cursor.execute(sqlUpdate)
+print(Cursor.rowcount, "record updated.")
+
+
+# ==================================================
+# ❌ Step 5: DELETE Operation (Remove a record)
+# ==================================================
+
+# Delete record where roll = 20
+sqlDelete = "DELETE FROM students WHERE roll = 20"
+Cursor.execute(sqlDelete)
+print(Cursor.rowcount, "record deleted.")
+
+
+# ==================================================
+# 💾 Step 6: Commit Changes
+# ==================================================
+
+# Save all insert, update, and delete operations permanently
+db.commit()
+
+
+# ==================================================
+# 🔚 Step 7: Close Connection
+# ==================================================
+
+# Close cursor and database connection
+Cursor.close()
+db.close()
+
+print("\n✅ Database operations completed successfully.")
+
+
+# ==================================================
+# 🧠 Reference SQL Commands (for setup)
+# ==================================================
+# These SQL commands should be executed once inside MySQL shell
+# before running this Python script:
+#
+# mysql -u root -p
+# ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
+# FLUSH PRIVILEGES;
+#
+# CREATE DATABASE connectMe;
+# USE connectMe;
+# CREATE TABLE students (
+#   roll INT,
+#   name VARCHAR(255)
+# );
+# exit
+#
+# Run the script using:
+# python3 connectSQL.py
+# ==================================================
