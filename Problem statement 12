@@ -1,0 +1,211 @@
+// ------------------------------------------------------------
+// employee_agg.js
+// Complete script for: Aggregation + Index tasks (cleaned & corrected)
+// Run in mongosh: mongosh employee_agg.js
+// ------------------------------------------------------------
+
+
+db.Employee.drop();
+
+// ----------------------
+// Insert 5 sample docs
+// ----------------------
+db.Employee.insertMany([
+  {
+    emp_id: 1,
+    name: { FName: "Maya", LName: "Dsouza" },
+    company_name: "TCS",
+    salary: 53000,
+    designation: "Tester",
+    age: 28,
+    expertise: ["Mongodb", "Mysql", "Cassandra"],
+    dob: ISODate("1998-10-12"),
+    email_id: "maya@gmail.com",
+    contact: "1234567890",
+    address: [{ PAddr: "Pune", Pin_code: "411001" }]
+  },
+  {
+    emp_id: 2,
+    name: { FName: "Seema", LName: "Haider" },
+    company_name: "Wipro",
+    salary: 83000,
+    designation: "Developer",
+    age: 38,
+    expertise: ["Mongodb", "Python", "Cassandra"],
+    dob: ISODate("1987-10-22"),
+    email_id: "seema@gmail.com",
+    contact: "7812345690",
+    address: [{ PAddr: "Pune", Pin_code: "411001" }]
+  },
+  {
+    emp_id: 3,
+    name: { FName: "Chandler", LName: "Mary" },
+    company_name: "TCS",
+    salary: 5300,
+    designation: "Tester",
+    age: 28,
+    expertise: ["DBMS", "Mysql", "Cassandra"],
+    dob: ISODate("1998-11-23"),
+    email_id: "chandler@gmail.com",
+    contact: "7894567210",
+    address: [{ PAddr: "Mumbai", Pin_code: "400001" }]
+  },
+  {
+    emp_id: 4,
+    name: { FName: "Meena", LName: "Kamina" },
+    company_name: "Wipro",
+    salary: 33000,
+    designation: "Developer",
+    age: 30,
+    expertise: ["Mongodb", "Python", "OOP"],
+    dob: ISODate("1995-02-10"),
+    email_id: "meena@gmail.com",
+    contact: "9812345690",
+    address: [{ PAddr: "Bangalore", Pin_code: "560001" }]
+  },
+  {
+    emp_id: 5,
+    name: { FName: "Rekha", LName: "Pujari" },
+    company_name: "Infosys",
+    salary: 153000,
+    designation: "DBA",
+    age: 32,
+    expertise: ["DBMS", "OOP", "Cassandra"],
+    dob: ISODate("1990-12-23"),
+    email_id: "rekha@gmail.com",
+    contact: "9314567210",
+    address: [{ PAddr: "Pune", Pin_code: "411001" }]
+  }
+]);
+
+// ----------------------
+// 1) Aggregation: Designation with totalSalary > 200000
+// ----------------------
+print("\n1) Designations with totalSalary > 200000");
+db.Employee.aggregate([
+  { $group: { _id: "$designation", totalSalary: { $sum: "$salary" } } },
+  { $match: { totalSalary: { $gt: 200000 } } },
+  { $project: { _id: 0, designation: "$_id", totalSalary: 1 } }
+]).forEach(doc => printjson(doc));
+
+// ----------------------
+// 2) Aggregate: return names and _id in UPPER CASE and alphabetical order
+// ----------------------
+print("\n2) Names and _id in UPPERCASE, sorted alphabetically");
+db.Employee.aggregate([
+  {
+    $project: {
+      _id: { $toUpper: { $toString: "$_id" } },
+      name: {
+        FName: { $toUpper: "$name.FName" },
+        LName: { $toUpper: "$name.LName" }
+      }
+    }
+  },
+  { $sort: { "name.FName": 1, "name.LName": 1 } }
+]).forEach(doc => printjson(doc));
+
+// ----------------------
+// 3) Aggregation: Total salary per city for designation = "DBA"
+// ----------------------
+print("\n3) Total salary per city for designation = 'DBA'");
+db.Employee.aggregate([
+  { $match: { designation: "DBA" } },
+  { $unwind: "$address" },
+  {
+    $group: {
+      _id: "$address.PAddr",
+      totalSalary: { $sum: "$salary" },
+      employees: { $push: "$name" }
+    }
+  },
+  { $project: { _id: 0, city: "$_id", totalSalary: 1, employees: 1 } }
+]).forEach(doc => printjson(doc));
+
+// ----------------------
+// 4) Create single-field index on 'designation'
+// ----------------------
+print("\n4) Create single-field index on designation");
+db.Employee.createIndex({ designation: 1 });
+
+// ----------------------
+// 5) Create multikey index on 'expertise' (array field)
+// ----------------------
+print("\n5) Create multikey index on expertise");
+db.Employee.createIndex({ expertise: 1 });
+
+// ----------------------
+// 6) Emp_id index performance test (insert many docs then compare)
+// Important: for accurate pre/post timing, you should run the two explain() calls
+// separately: one BEFORE creating the index and one AFTER creating it.
+// This script will:
+//  - insert N documents if you choose (default 10000)
+//  - run a pre-index explain (by dropping index first)
+//  - create index
+//  - run a post-index explain
+// ----------------------
+var totalToInsert = 10000; // adjust if your environment is limited
+var startId = 1000;
+
+// Insert bulk in batches to avoid memory issues
+print("\n6) Inserting " + totalToInsert + " auto documents (batches). This may take a bit...");
+var batch = [];
+for (var i = 0; i < totalToInsert; i++) {
+  var id = startId + i;
+  batch.push({
+    emp_id: id,
+    name: { FName: "Auto" + id, LName: "User" + id },
+    company_name: (i % 3 === 0) ? "TCS" : ((i % 3 === 1) ? "Infosys" : "Wipro"),
+    salary: Math.floor(Math.random() * 100000) + 20000,
+    designation: (i % 4 === 0) ? "Developer" : (i % 4 === 1 ? "Tester" : (i % 4 === 2 ? "DBA" : "Analyst")),
+    age: Math.floor(Math.random() * 30) + 22,
+    expertise: ["Mongodb", "Mysql"],
+    dob: ISODate("1995-01-01"),
+    email_id: "auto" + id + "@example.com",
+    contact: "9" + Math.floor(100000000 + Math.random() * 900000000).toString(),
+    address: [{ PAddr: (i % 5 === 0 ? "Pune" : "Mumbai"), Pin_code: (i % 5 === 0 ? "411001" : "400001") }]
+  });
+
+  if (batch.length === 1000) {
+    db.Employee.insertMany(batch);
+    print("Inserted up to emp_id: " + id);
+    batch = [];
+  }
+}
+if (batch.length > 0) {
+  db.Employee.insertMany(batch);
+  print("Inserted final batch.");
+}
+
+// Pre-index explain: ensure emp_id index is absent, then measure
+try {
+  db.Employee.dropIndex({ emp_id: 1 });
+  print("Dropped existing emp_id index to measure pre-index performance.");
+} catch (e) {
+  // ignore if index didn't exist
+  print("No existing emp_id index to drop (okay).");
+}
+
+print("Pre-index explain (executionStats) for emp_id=5000:");
+printjson(db.Employee.find({ emp_id: 5000 }).explain("executionStats"));
+
+// Create emp_id index
+print("Creating index on emp_id");
+db.Employee.createIndex({ emp_id: 1 });
+
+// Post-index explain
+print("Post-index explain (executionStats) for emp_id=5000:");
+printjson(db.Employee.find({ emp_id: 5000 }).explain("executionStats"));
+
+// ----------------------
+// 7) List of indexes on Employee collection
+// ----------------------
+print("\n7) Indexes on Employee collection:");
+printjson(db.Employee.getIndexes());
+
+// ----------------------
+// Summary info
+// ----------------------
+print("\nTotal documents in Employee collection: " + db.Employee.countDocuments());
+print("Sample documents (limit 5):");
+db.Employee.find({}, { emp_id: 1, name: 1, company_name: 1, salary: 1 }).limit(5).forEach(d => printjson(d));
