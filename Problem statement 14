@@ -1,0 +1,194 @@
+// ===============================
+// 🌟 Employee Collection Creation
+// ===============================
+
+db.emp.insertMany([
+  {
+    Name: { FName: "Tanmay", LName: "Machkar" },
+    Company: "TCS",
+    Salary: 40000,
+    Designation: "Tester",
+    Age: 25,
+    Expertise: ["Mongodb", "Mysql", "Cassandra"],
+    DOB: "2003-12-02", // Using string for DOB
+    Email: "xyz@gmail.com",
+    Contact: 1234567890,
+    Address: [{ PAddr: { City: "Pune", Rd: "Bharatmata" } }, { LAddr: { Pin_code: 411001 } }]
+  },
+  {
+    Name: { FName: "Rajesh", LName: "Machkar" },
+    Company: "Infosys",
+    Salary: 50000,
+    Designation: "Programmer",
+    Age: 29,
+    Expertise: ["Mongodb", "Mysql"],
+    DOB: "1990-12-02",
+    Email: "xy@gmail.com",
+    Contact: 1234567809,
+    Address: [{ PAddr: { City: "Pune", Rd: "JM" } }, { LAddr: { Pin_code: 411047 } }]
+  },
+  {
+    Name: { FName: "Tejas", LName: "Machkar" },
+    Company: "TCS",
+    Salary: 20000,
+    Designation: "Developer",
+    Age: 35,
+    Expertise: ["Mongodb"],
+    DOB: "2000-11-22",
+    Email: "x@gmail.com",
+    Contact: 1234567089,
+    Address: [{ PAddr: { City: "Mumbai", Rd: "Airport" } }, { LAddr: { Pin_code: 411030 } }]
+  },
+  {
+    Name: { FName: "Deepali", LName: "Machkar" },
+    Company: "Persistent",
+    Salary: 40000,
+    Designation: "Tester",
+    Age: 30,
+    Expertise: ["Mysql"],
+    DOB: "1978-02-12",
+    Email: "y@gmail.com",
+    Contact: 1234506789,
+    Address: [{ PAddr: { City: "Phaltan", Rd: "Highway" } }, { LAddr: { Pin_code: 411012 } }]
+  },
+  {
+    Name: { FName: "Om", LName: "Deokar" },
+    Company: "Persistent",
+    Salary: 25000,
+    Designation: "Programmer",
+    Age: 39,
+    Expertise: ["Cassandra"],
+    DOB: "2007-03-15",
+    Email: "z@gmail.com",
+    Contact: 1234567890,
+    Address: [{ PAddr: { City: "Jaipur", Rd: "Pink" } }, { LAddr: { Pin_code: 411056 } }]
+  }
+]);
+
+// =====================================================
+// 1️⃣ Display the total salary of each company
+// =====================================================
+
+db.emp.mapReduce(
+  function () {
+    // Emit company name as key, salary as value
+    emit(this.Company, this.Salary);
+  },
+  function (key, values) {
+    // Sum all salaries for each company
+    return Array.sum(values);
+  },
+  { out: "query1" } // Store result in collection "query1"
+);
+
+// View the result
+db.query1.find();
+
+
+// =====================================================
+// 2️⃣ Display the total salary for company name "TCS"
+// =====================================================
+
+db.emp.mapReduce(
+  function () {
+    // Emit only for company TCS
+    if (this.Company === "TCS") {
+      emit(this.Company, this.Salary);
+    }
+  },
+  function (key, values) {
+    // Add salaries of TCS employees
+    return Array.sum(values);
+  },
+  { out: "query2" }
+);
+
+// View the result
+db.query2.find();
+
+
+// =====================================================
+// 3️⃣ Return the average salary of company whose city = "Pune"
+// =====================================================
+
+db.emp.mapReduce(
+  function () {
+    // Check if employee's address city is Pune
+    if (this.Address[0].PAddr.City === "Pune") {
+      emit(this.Company, { sum: this.Salary, count: 1 });
+    }
+  },
+  function (key, values) {
+    // Combine sum and count values for each company
+    var result = { sum: 0, count: 0 };
+    values.forEach(v => {
+      result.sum += v.sum;
+      result.count += v.count;
+    });
+    return result;
+  },
+  {
+    out: "query3",
+    // Finalize computes average (sum / count)
+    finalize: function (key, reducedValue) {
+      return reducedValue.sum / reducedValue.count;
+    }
+  }
+);
+
+// View the result
+db.query3.find();
+
+
+// =====================================================
+// 4️⃣ Display total count for employees with city = "Pune"
+// =====================================================
+
+db.emp.mapReduce(
+  function () {
+    // Emit 1 for every employee living in Pune
+    if (this.Address[0].PAddr.City === "Pune") {
+      emit("Count", 1);
+    }
+  },
+  function (key, values) {
+    // Sum up all counts
+    return Array.sum(values);
+  },
+  { out: "query4" }
+);
+
+// View the result
+db.query4.find();
+
+
+// =====================================================
+// 5️⃣ Return count for employees in Pune AND age > 40
+// =====================================================
+
+db.emp.mapReduce(
+  function () {
+    // Emit 1 if city is Pune and age > 40
+    if (this.Address[0].PAddr.City === "Pune" && this.Age > 40) {
+      emit("Count", 1);
+    }
+  },
+  function (key, values) {
+    // Sum counts to get total number of employees matching condition
+    return Array.sum(values);
+  },
+  { out: "query5" }
+);
+
+// View the result
+db.query5.find();
+
+
+// =====================================================
+// 🧹 Optional Cleanup: Drop output collections if re-running
+// =====================================================
+// db.query1.drop();
+// db.query2.drop();
+// db.query3.drop();
+// db.query4.drop();
+// db.query5.drop();
