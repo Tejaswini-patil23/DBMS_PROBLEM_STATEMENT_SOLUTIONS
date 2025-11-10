@@ -1,0 +1,117 @@
+// 1. Switch to your database (or create one)
+use EmployeeDB;
+
+// 2. Drop the collection if it already exists (for clean run)
+db.Employee.drop();
+
+// 3. Create Employee collection and insert 5 sample documents
+db.Employee.insertMany([
+  {
+    name: { FName: "Maya", LName: "Dsouza" },
+    company_name: "TCS",
+    salary: 53000,
+    designation: "Tester",
+    age: 28,
+    expertise: ["Mongodb", "Mysql", "Cassandra"],
+    dob: "12-10-1998",
+    Email_id: "Maya@gmail.com",
+    contact: "1234567890",
+    address: [{ PAddr: "Nashik" }, { LAddr: "Pune" }]
+  },
+  {
+    name: { FName: "Seema", LName: "Haider" },
+    company_name: "Wipro",
+    salary: 83000,
+    designation: "Programmer",
+    age: 38,
+    expertise: ["Mongodb", "Python", "Cassandra"],
+    dob: "22-10-1998",
+    Email_id: "Seema@gmail.com",
+    contact: "7812345690",
+    address: [{ PAddr: "Dhule" }, { LAddr: "Pune" }]
+  },
+  {
+    name: { FName: "Chandler", LName: "Mary" },
+    company_name: "TCS",
+    salary: 5300,
+    designation: "Tester",
+    age: 28,
+    expertise: ["DBMS", "Mysql", "Cassandra"],
+    dob: "23-11-1998",
+    Email_id: "Chandler@gmail.com",
+    contact: "7894567210",
+    address: [{ PAddr: "Dhule" }, { LAddr: "Mumbai" }]
+  },
+  {
+    name: { FName: "Meena", LName: "Kamina" },
+    company_name: "Wipro",
+    salary: 33000,
+    designation: "Programmer",
+    age: 38,
+    expertise: ["Mongodb", "Python", "OOP"],
+    dob: "02-10-1999",
+    Email_id: "Meena@gmail.com",
+    contact: "9812345690",
+    address: [{ PAddr: "Nashik" }, { LAddr: "Mumbai" }]
+  },
+  {
+    name: { FName: "Rekha", LName: "Pujari" },
+    company_name: "Infosys",
+    salary: 15300,
+    designation: "Tester",
+    age: 28,
+    expertise: ["DBMS", "OOP", "Cassandra"],
+    dob: "23-12-2008",
+    Email_id: "Rekha@gmail.com",
+    contact: "9314567210",
+    address: [{ PAddr: "Jalgaon" }, { LAddr: "Pune" }]
+  }
+]);
+
+// 4. Query 1: Find final name of Employee where age < 30 and salary > 50000
+db.Employee.find(
+  { age: { $lt: 30 }, salary: { $gt: 50000 } },
+  { "name": 1, _id: 0 }
+);
+
+// 5. Query 2: Create a new document if no document contains {Designation: "Tester", Company_name: "TCS", Age: 25}
+db.Employee.updateOne(
+  { designation: "Tester", company_name: "TCS", age: 25 },
+  {
+    $setOnInsert: {
+      name: { FName: "Maya", LName: "Dsouza" },
+      company_name: "TCS",
+      salary: 53000,
+      designation: "Tester",
+      age: 28,
+      expertise: ["Mongodb", "Mysql", "Cassandra"],
+      dob: "12-10-1998",
+      Email_id: "Maya@gmail.com",
+      contact: "1234567890",
+      address: [{ PAddr: "Nashik" }, { LAddr: "Pune" }]
+    }
+  },
+  { upsert: true }
+);
+
+// 6. Query 3: Select all documents where age < 30 OR salary > 40000
+db.Employee.find(
+  { $or: [ { age: { $lt: 30 } }, { salary: { $gt: 40000 } } ] }
+);
+
+// 7. Query 4: Find documents where Designation is not equal to "Developer"
+db.Employee.find(
+  { designation: { $ne: "Developer" } }
+);
+
+// 8. Query 5: Find _id, Designation, Address, and Name from all documents where Company_name is "Infosys"
+db.Employee.find(
+  { company_name: "Infosys" },
+  { _id: 1, designation: 1, address: 1, name: 1 }
+);
+
+// 9. Query 6: Display only FName and LName of all Employees
+db.Employee.find(
+  {},
+  { "name.FName": 1, "name.LName": 1, _id: 0 }
+);
