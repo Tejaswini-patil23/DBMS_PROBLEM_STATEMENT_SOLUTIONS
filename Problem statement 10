@@ -1,0 +1,147 @@
+// ------------------------------------------------------------
+// USE DATABASE
+// ------------------------------------------------------------
+use company;
+
+// ------------------------------------------------------------
+// CREATE Employee COLLECTION AND INSERT DOCUMENTS
+// ------------------------------------------------------------
+
+db.Employee.insertMany([
+  {
+    Name: { FName: "Tejas", LName: "Patil" },
+    Company_name: "TCS",
+    Salary: 45000,
+    Designation: "Programmer",
+    Age: 24,
+    Expertise: ["Mongodb", "Mysql", "Cassandra"],
+    DOB: "2001-03-15",
+    Email: "tejas.patil@tcs.com",
+    Contact: "9876543210",
+    Address: [
+      { PAddr: "Pune", LAddr: "Mumbai" }
+    ]
+  },
+  {
+    Name: { FName: "Riya", LName: "Sharma" },
+    Company_name: "InfoSys",
+    Salary: 38000,
+    Designation: "Tester",
+    Age: 25,
+    Expertise: ["Mysql", "Cassandra"],
+    DOB: "2000-09-05",
+    Email: "riya.sharma@infosys.com",
+    Contact: "9823456789",
+    Address: [
+      { PAddr: "Delhi", LAddr: "Noida" }
+    ]
+  },
+  {
+    Name: { FName: "Aarav", LName: "Verma" },
+    Company_name: "Wipro",
+    Salary: 52000,
+    Designation: "Programmer",
+    Age: 27,
+    Expertise: ["Mongodb", "NodeJS"],
+    DOB: "1998-01-10",
+    Email: "aarav.verma@wipro.com",
+    Contact: "9811122233",
+    Address: [
+      { PAddr: "Hyderabad", LAddr: "Bangalore" }
+    ]
+  },
+  {
+    Name: { FName: "Meera", LName: "Desai" },
+    Company_name: "TCS",
+    Salary: 47000,
+    Designation: "Analyst",
+    Age: 26,
+    Expertise: ["Cassandra", "Mongodb", "Mysql"],
+    DOB: "1999-07-22",
+    Email: "meera.desai@tcs.com",
+    Contact: "9988776655",
+    Address: [
+      { PAddr: "Nashik", LAddr: "Pune" }
+    ]
+  },
+  {
+    Name: { FName: "Raj", LName: "Kapoor" },
+    Company_name: "InfoSys",
+    Salary: 60000,
+    Designation: "Developer",
+    Age: 28,
+    Expertise: ["ReactJS", "NodeJS", "MongoDB"],
+    DOB: "1997-02-14",
+    Email: "raj.kapoor@infosys.com",
+    Contact: "9876500000",
+    Address: [
+      { PAddr: "Jaipur", LAddr: "Gurgaon" }
+    ]
+  }
+]);
+
+// ------------------------------------------------------------
+// 1️⃣ QUERY 1
+// Select all documents where Designation = "Programmer" and Salary > 30000
+// ------------------------------------------------------------
+db.Employee.find({ Designation: "Programmer", Salary: { $gt: 30000 } });
+
+// ------------------------------------------------------------
+// 2️⃣ QUERY 2
+// Insert new document if no record exists with Designation: "Tester", Company_name: "TCS", Age: 25
+// ------------------------------------------------------------
+db.Employee.updateOne(
+  { Designation: "Tester", Company_name: "TCS", Age: 25 },
+  {
+    $setOnInsert: {
+      Name: { FName: "Sneha", LName: "Joshi" },
+      Company_name: "TCS",
+      Salary: 40000,
+      Designation: "Tester",
+      Age: 25,
+      Expertise: ["Mongodb", "Mysql"],
+      DOB: "2000-04-05",
+      Email: "sneha.joshi@tcs.com",
+      Contact: "9898989898",
+      Address: [
+        { PAddr: "Pune", LAddr: "Chennai" }
+      ]
+    }
+  },
+  { upsert: true } // This creates a new document if none matches
+);
+
+// ------------------------------------------------------------
+// 3️⃣ QUERY 3
+// Increase salary of each Employee working with “Infosys" by 10000
+// ------------------------------------------------------------
+db.Employee.updateMany(
+  { Company_name: "InfoSys" },
+  { $inc: { Salary: 10000 } }
+);
+
+// ------------------------------------------------------------
+// 4️⃣ QUERY 4
+// Find all employees working with "TCS" and reduce their salary by 5000
+// ------------------------------------------------------------
+db.Employee.updateMany(
+  { Company_name: "TCS" },
+  { $inc: { Salary: -5000 } }
+);
+
+// ------------------------------------------------------------
+// 5️⃣ QUERY 5
+// Return documents where Designation is NOT equal to "Tester"
+// ------------------------------------------------------------
+db.Employee.find({ Designation: { $ne: "Tester" } });
+
+// ------------------------------------------------------------
+// 6️⃣ QUERY 6
+// Find all employee with EXACT match on an array having
+// Expertise: ['Mongodb', 'Mysql', 'Cassandra']
+// (Order and length must match exactly)
+// ------------------------------------------------------------
+db.Employee.find({ Expertise: { $eq: ["Mongodb", "Mysql", "Cassandra"] } });
+
+// OPTIONAL: If order doesn’t matter, use $all instead of $eq
+// db.Employee.find({ Expertise: { $all: ["Mongodb", "Mysql", "Cassandra"] } });
