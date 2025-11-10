@@ -1,0 +1,116 @@
+// 1. Use or create a database
+use CompanyDB;
+
+// 2. Create Employee collection with sample documents
+db.Employee.insertMany([
+  {
+    Emp_id: 101,
+    name: { FName: "Maya", LName: "Dsouza" },
+    company_name: "TCS",
+    salary: 53000,
+    designation: "Tester",
+    age: 28,
+    expertise: ["Mongodb", "Mysql", "Cassandra"],
+    dob: "1998-12-10",
+    Email_id: "Maya@gmail.com",
+    contact: "1234567890",
+    address: [{ PAddr: "Nashik" }, { LAddr: "Pune" }]
+  },
+  {
+    Emp_id: 102,
+    name: { FName: "Seema", LName: "Haider" },
+    company_name: "Wipro",
+    salary: 83000,
+    designation: "Developer",
+    age: 38,
+    expertise: ["Mongodb", "Python", "Cassandra"],
+    dob: "1988-10-22",
+    Email_id: "Seema@gmail.com",
+    contact: "7812345690",
+    address: [{ PAddr: "Dhule" }, { LAddr: "Pune" }]
+  },
+  {
+    Emp_id: 103,
+    name: { FName: "Chandler", LName: "Mary" },
+    company_name: "TCS",
+    salary: 5300,
+    designation: "Tester",
+    age: 28,
+    expertise: ["DBMS", "Mysql", "Cassandra"],
+    dob: "1998-11-23",
+    Email_id: "Chandler@gmail.com",
+    contact: "7894567210",
+    address: [{ PAddr: "Dhule" }, { LAddr: "Mumbai" }]
+  },
+  {
+    Emp_id: 104,
+    name: { FName: "Meena", LName: "Kamina" },
+    company_name: "Wipro",
+    salary: 33000,
+    designation: "Developer",
+    age: 38,
+    expertise: ["Mongodb", "Python", "OOP"],
+    dob: "1999-02-10",
+    Email_id: "Meena@gmail.com",
+    contact: "9812345690",
+    address: [{ PAddr: "Nashik" }, { LAddr: "Mumbai" }]
+  },
+  {
+    Emp_id: 105,
+    name: { FName: "Rekha", LName: "Pujari" },
+    company_name: "Infosys",
+    salary: 15300,
+    designation: "Tester",
+    age: 28,
+    expertise: ["DBMS", "OOP", "Cassandra"],
+    dob: "2008-12-23",
+    Email_id: "Rekha@gmail.com",
+    contact: "9314567210",
+    address: [{ PAddr: "Jalgaon" }, { LAddr: "Pune" }]
+  }
+]);
+
+// 1. Create a new document if it does not exist (upsert)
+db.Employee.updateOne(
+  { Designation: "Tester", company_name: "TCS", age: 25 },
+  { $setOnInsert: {
+      Emp_id: 106,
+      name: { FName: "Ravi", LName: "Patil" },
+      company_name: "TCS",
+      salary: 45000,
+      designation: "Tester",
+      age: 25,
+      expertise: ["Java", "Mongodb"],
+      dob: "2000-01-15",
+      Email_id: "Ravi@gmail.com",
+      contact: "9988776655",
+      address: [{ PAddr: "Pune" }, { LAddr: "Mumbai" }]
+    }
+  },
+  { upsert: true }
+);
+
+// 2. Increase salary by 2000 for all employees working in TCS
+db.Employee.updateMany(
+  { company_name: "TCS" },
+  { $inc: { salary: 2000 } }
+);
+
+// 3. Find documents with Address having exact embedded document {PAddr:"Pune", Pin_code:"411001"}
+db.Employee.find({
+  address: { $elemMatch: { PAddr: "Pune", Pin_code: "411001" } }
+});
+
+// 4. Find employee details who are working as "Developer" or "Tester"
+db.Employee.find({
+  $or: [
+    { designation: "Developer" },
+    { designation: "Tester" }
+  ]
+});
+
+// 5. Delete a single document where designation = "Developer"
+db.Employee.deleteOne({ designation: "Developer" });
+
+// 6. Count number of documents in Employee collection
+db.Employee.countDocuments();
